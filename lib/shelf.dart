@@ -19,7 +19,6 @@ class _MyHomePageState extends State<ShelfPage> {
           height: 600,
           child: Stack(
             children: [
-              // Shelf background
               Image(
                 image: ResizeImage(
                   AssetImage('assets/shelf.png'),
@@ -31,7 +30,6 @@ class _MyHomePageState extends State<ShelfPage> {
                 width: 400,
                 height: 600,
               ),
-              // Books aligned to bottom
               Padding(
                 padding: const EdgeInsets.all(30),
                 child: Wrap(
