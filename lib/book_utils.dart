@@ -33,7 +33,8 @@ class Utils{
   
   Utils._();
 
-
+  static const double initialXMargin = 20;
+  static const double initialYMargin = 30;
   static const double shelfHeight = 50;
   static const double bookshelfGap = 200;
   static const double shelfThreshold = 50;
@@ -51,7 +52,7 @@ class Utils{
     location = location % bookshelfThreshold;
     double tempY = (location ~/ shelfThreshold) * shelfHeight;
     double tempX = location % shelfThreshold;
-    return (tempX, tempY, tempNo);
+    return (initialXMargin + tempX, initialYMargin + tempY, tempNo);
   }
 
   static Future<BookInfo> fetchBook(String isbn) async{
