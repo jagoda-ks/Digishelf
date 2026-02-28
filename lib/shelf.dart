@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'book_utils.dart';
 import 'book_widget.dart';
 
 class ShelfPage extends StatefulWidget {
@@ -9,39 +10,27 @@ class ShelfPage extends StatefulWidget {
   State<ShelfPage> createState() => _ShelfPageState();
 }
 
-class Item {
-  double x;
-  double y;
-  final double bookWidth;
-  final String label;
-
-  Item(this.x, this.y, this.bookWidth, this.label);
-}
-
 class _ShelfPageState extends State<ShelfPage> {
 
-  final List<Item> items = [ // items should probable be named books. also i spelt probaly wrong
-    Item(0, 0, 10, "Book A"),
-    Item(40, 0, 20, "Book D"),
-    Item(70, 0, 30, "Book E"),
-    Item(110, 0, 10, "Book F"),
-    Item(140, 0, 30, "Book G"),
-    Item(50, 120, 40, "Book H"),
+  final List<List<BookInfo>> shelves = [
+
+    [
+      BookInfo("Book A", "cillian", 200, "2020", "3932850238", null),
+      BookInfo("Book B", "cillian", 120, "2021", "1234567890", null),
+    ],
+
+    [
+      BookInfo("Book C", "cillian", 180, "2022", "9999999999", null),
+      BookInfo("Book D", "cillian", 90, "2023", "8888888888", null),
+    ],
+
   ];
 
-  double adjusted(double value) {
-    if (value % 100 == 0 && value != 0) {
-      return value + 50;
-    }
-    return value;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SizedBox(
-        width: 400,
-        height: 300,
+  Widget buildShelf(List<BookInfo> books) {
+    return Center(
+      child: SizedBox(
+        width: MediaQuery.sizeOf(context).width * 0.9,
+        height: MediaQuery.sizeOf(context).width * 1.5,
 
         child: Stack(
           children: [
@@ -54,36 +43,47 @@ class _ShelfPageState extends State<ShelfPage> {
               ),
             ),
 
-            ...items.asMap().entries.map((entry) {
+            ...books.map((book) {
 
-              int index = entry.key;
-              Item item = entry.value;
+              var booksPlace = Utils.getPos(book.location);
 
               return Positioned(
-                left: item.x,
-                top: item.y,
+                left: booksPlace.$1,
+                top: booksPlace.$2,
 
-                child: GestureDetector(
-
-                  onPanUpdate: (details) {
-                    setState(() {
-                      item.x += details.delta.dx; // send this to ulas he will figure it out
-                      item.y += details.delta.dy;
-                    });
-                  },
-
-                  child: BookWidget(
-                    title: item.label,
-                    width: item.bookWidth,
-                    height: 100,
-                  ),
+                child: BookWidget(
+                  title: book.title,
+                  width: book.width,
+                  height: 100,
                 ),
               );
-            }),
 
+            }),
           ],
         ),
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+
+      body: PageView.builder(
+
+        scrollDirection: Axis.horizontal,
+
+        itemCount: shelves.length,
+
+        itemBuilder: (context, index) {
+
+          return buildShelf(shelves[index]);
+
+        },
+
+      ),
+
     );
   }
 }
