@@ -34,7 +34,7 @@ class _BookWidgetState extends State<BookWidget> {
           height: widget.height,
           transform: Matrix4.identity()
             ..setEntry(3, 2, 0.001)
-            ..rotateY(_isHovered ? -0.1 : 0),
+            ..rotateY(_isHovered ? 1 : 0),
           child: Stack(
             children: [
               Positioned(
