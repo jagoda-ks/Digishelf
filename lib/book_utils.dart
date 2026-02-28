@@ -5,13 +5,16 @@ import 'dart:math';
 
 void main() async{
   
-  BookInfo a = await Utils.fetchBook("9786055794804");
-  print(a.cover);
+  //BookInfo a = await Utils.fetchBook("9786055794804");
+  //print(a.cover);
+
+  //print(Utils.getPos(6132).$1);
 
 }
 
 class BookInfo {
-  double posX = 0;
+  double location = 0;
+  double rot = 0;
   double width = Utils.widthPerPage * Utils.defaultPageCount;
   double height = 10;
 
@@ -33,11 +36,23 @@ class Utils{
 
   static const double shelfHeight = 50;
   static const double bookshelfGap = 200;
+  static const double shelfThreshold = 50;
+  static const double bookshelfThreshold = 200;
   static const double widthPerPage = 2; //Temp value
   static const int defaultPageCount = 50; //If returns null
   static List<BookInfo> books = List.empty();
 
   static double getWidth(double pages) => widthPerPage * pages;
+
+  static double adjustYWithRot() => shelfHeight;
+
+  static (double x, double y, int bookshelfNo) getPos(double location){
+    int tempNo = location ~/ bookshelfThreshold;
+    location = location % bookshelfThreshold;
+    double tempY = (location ~/ shelfThreshold) * shelfHeight;
+    double tempX = location % shelfThreshold;
+    return (tempX, tempY, tempNo);
+  }
 
   static Future<BookInfo> fetchBook(String isbn) async{
     final results = await http.get(Uri.parse('https://openlibrary.org/api/books?bibkeys=ISBN:$isbn&jscmd=data&format=json'));
