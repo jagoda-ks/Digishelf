@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_this
+
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -5,8 +7,12 @@ import 'dart:math';
 
 void main() async{
   
-  //BookInfo a = await Utils.fetchBook("9786055794804");
-  //print(a.cover);
+  BookInfo a = await Utils.fetchBook("9786055794804");
+  print(a.location);
+  print(a.width);
+  BookInfo b = await Utils.fetchBook("9786055794804");
+  print(b.location);
+  print(b.width);
 
   //print(Utils.getPos(6132).$1);
 
@@ -17,6 +23,9 @@ class BookInfo {
   double rot = 0;
   double width = Utils.widthPerPage * Utils.defaultPageCount;
   double height = 10;
+  double coveredWidth = 0;
+  Vector2D? pos;
+  int bookshelfNo = 0;
 
   int pageCount;
   String isbn;
@@ -26,7 +35,17 @@ class BookInfo {
   Uint8List? cover;
   
 
-  BookInfo(this.title, this.author, this.pageCount, this.pubDate, this.isbn, this.cover);
+  BookInfo(this.title, this.author, this.pageCount, this.pubDate, this.isbn, this.cover){
+    this.width = Utils.getWidth(pageCount);
+    this.coveredWidth = this.width;
+    this.location = Utils.getAvailablePos(this.width);
+    Utils.regionAvailability.add(this.location-width/2);
+    Utils.regionAvailability.add(this.location+width/2);
+    var tmp = Utils.getPos(this.location);
+    this.bookshelfNo = tmp.$3;
+    this.pos = Vector2D(tmp.$1, tmp.$2);
+    Utils.books.add(this);
+  }
 }
 
 class Utils{
@@ -41,11 +60,32 @@ class Utils{
   static const double bookshelfThreshold = 200;
   static const double widthPerPage = 2; //Temp value
   static const int defaultPageCount = 50; //If returns null
-  static List<BookInfo> books = List.empty();
+  static List<BookInfo> books = List.empty(growable: true);
+  static List<double> regionAvailability = List.empty(growable: true);
 
-  static double getWidth(double pages) => widthPerPage * pages;
+  static double getWidth(int pages) => widthPerPage * pages;
 
   static double adjustYWithRot() => shelfHeight;
+
+  static double getAvailablePos(double width){
+    if (regionAvailability.isEmpty){
+      regionAvailability.add(0);
+      regionAvailability.add(width);
+      return width/2;
+    }
+
+
+    bool isAvailable = true;
+
+    for (int i = 0; i < regionAvailability.length-1; i++){
+      isAvailable = !isAvailable;
+      if (isAvailable && regionAvailability[i+1] - regionAvailability[i] > width){
+        return regionAvailability[i] + width/2;
+      }
+    }
+
+    return regionAvailability[regionAvailability.length-1] + width/2;
+  }
 
   static (double x, double y, int bookshelfNo) getPos(double location){
     int tempNo = location ~/ bookshelfThreshold;
@@ -72,6 +112,7 @@ class Utils{
   }
 
 }
+
 
 class Matrix {
     int rows;
