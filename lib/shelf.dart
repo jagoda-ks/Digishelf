@@ -93,9 +93,6 @@ void initState() {
   static List<List<BookInfo>> _buildShelves() {
     final List<List<BookInfo>> result = [];
 
-    // Each BookInfo(title, author, pageCount, pubDate, isbn, cover)
-    // width is computed inside BookInfo as: Utils.getWidth(pageCount)
-    // which equals Utils.widthPerPage * pageCount (2.0 * pages)
     Utils.books.clear();
     Utils.regionAvailability.clear();
     result.add([
