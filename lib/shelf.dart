@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'book_utils.dart';
 import 'book_widget.dart';
@@ -115,17 +117,19 @@ class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMix
     });
   }
 
-  void _onBookHoldEnd(BookInfo book, Offset endPosition, int shelfIndex) {
-    _ticker.stop();
-    setState(() {
-      _heldBook = null;
-      _physics = null;
-    });
-    // TODO: snap to nearest available position using endPosition on shelfIndex
-  }
+void _onBookHoldEnd(BookInfo book, Offset endPosition, int shelfIndex) {
+  _ticker.stop();
+  setState(() {
+    _heldBook = null;
+    _physics = null;
+  });
+
+  final tmp = Utils.updatePos(book, endPosition, shelfIndex);
+  book.pos = tmp;
+}
 
   Widget buildShelf(List<BookInfo> books, int shelfIndex) {
-    return Center(
+    return Center( 
       child: SizedBox(
         width: MediaQuery.sizeOf(context).width * 0.9,
         height: MediaQuery.sizeOf(context).width * 1.5,
