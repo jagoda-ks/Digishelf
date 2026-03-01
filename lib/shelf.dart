@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'book_utils.dart';
 import 'book_widget.dart';
+import 'desk.dart';
 import 'package:flutter/scheduler.dart';
 
 class ShelfPage extends StatefulWidget {
@@ -59,6 +60,9 @@ class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMix
   _DragPhysics? _physics;
   late final Ticker _ticker;
 
+  // Whether the drag is currently hovering over the drop zone
+  bool _isOverDropZone = false;
+
   @override
   void initState() {
     super.initState();
@@ -97,12 +101,18 @@ class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMix
     return result;
   }
 
+  bool _isInDropZone(Offset globalPosition) {
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    return globalPosition.dy >= screenHeight * 0.9;
+  }
+
   void _onBookHoldStart(BookInfo book) {
     final startPos = Offset(book.pos?.x ?? 0, book.pos?.y ?? 0);
     setState(() {
       _heldBook = book;
       _dragPosition = startPos;
       _physics = _DragPhysics(startPos);
+      _isOverDropZone = false;
     });
     _ticker.start();
   }
@@ -111,86 +121,177 @@ class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMix
     if (_heldBook == null || _physics == null) return;
     final Offset origin = Offset(_heldBook!.pos?.x ?? 0, _heldBook!.pos?.y ?? 0);
     final newPos = origin + details.offsetFromOrigin;
+
+    // Check drop zone using global position
+    final bool overZone = _isInDropZone(details.globalPosition);
+
     setState(() {
       _dragPosition = newPos;
       _physics!.update(newPos);
+      _isOverDropZone = overZone;
     });
   }
 
-void _onBookHoldEnd(BookInfo book, Offset endPosition, int shelfIndex) {
-  _ticker.stop();
-  setState(() {
-    _heldBook = null;
-    _physics = null;
-  });
+  void _onBookHoldEnd(BookInfo book, Offset endPosition, int shelfIndex) {
+    _ticker.stop();
 
-  final tmp = Utils.updatePos(book, endPosition, shelfIndex);
-  book.pos = tmp;
-}
+    if (_isOverDropZone) {
+      // Drop on desk zone — navigate to desk
+      setState(() {
+        _heldBook = null;
+        _physics = null;
+        _isOverDropZone = false;
+      });
+      _openDesk(book);
+    } else {
+      // Normal drop — update position
+      setState(() {
+        _heldBook = null;
+        _physics = null;
+        _isOverDropZone = false;
+      });
+      final tmp = Utils.updatePos(book, endPosition, shelfIndex);
+      book.pos = tmp;
+    }
+  }
+
+  void _openDesk(BookInfo book) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            DeskPage(book: book),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          // Slide up from bottom
+          const begin = Offset(0.0, 1.0);
+          const end = Offset.zero;
+          const curve = Curves.easeOutCubic;
+          final tween = Tween(begin: begin, end: end)
+              .chain(CurveTween(curve: curve));
+          return SlideTransition(
+            position: animation.drive(tween),
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 450),
+      ),
+    );
+  }
 
   Widget buildShelf(List<BookInfo> books, int shelfIndex) {
-    return Center( 
-      child: SizedBox(
-        width: MediaQuery.sizeOf(context).width * 0.9,
-        height: MediaQuery.sizeOf(context).width * 1.5,
+    final screenHeight = MediaQuery.sizeOf(context).height;
 
-        child: Stack(
-          children: [
+    return Stack(
+      children: [
+        Center(
+          child: SizedBox(
+            width: MediaQuery.sizeOf(context).width * 0.9,
+            height: MediaQuery.sizeOf(context).width * 1.5,
 
-            Positioned.fill(
-              child: Image.asset(
-                'assets/shelf.png',
-                fit: BoxFit.fill,
-                filterQuality: FilterQuality.none,
-              ),
-            ),
+            child: Stack(
+              children: [
 
-            ...books.map((book) {
-              final bool isHeld = _heldBook == book;
-
-              double x, y;
-              double tilt = 0.0;
-
-              if (isHeld && _physics != null) {
-                x = _physics!.displayPosition.dx;
-                y = _physics!.displayPosition.dy;
-                tilt = _physics!.tiltAngle;
-              } else {
-                x = book.pos?.x ?? Utils.getPos(book.location).$1;
-                y = book.pos?.y ?? Utils.getPos(book.location).$2;
-              }
-
-              return Positioned(
-                left: x,
-                bottom: MediaQuery.sizeOf(context).height - y,
-
-                child: GestureDetector(
-                  onLongPressStart: (_) => _onBookHoldStart(book),
-                  onLongPressMoveUpdate: isHeld ? _onDragUpdate : null,
-                  onLongPressEnd: (_) => _onBookHoldEnd(book, _dragPosition, shelfIndex),
-                  onLongPressCancel: () => _onBookHoldEnd(book, _dragPosition, shelfIndex),
-
-                  child: AnimatedScale(
-                    scale: isHeld ? 1.08 : 1.0,
-                    duration: const Duration(milliseconds: 150),
-                    curve: Curves.easeOut,
-
-                    child: Transform.rotate(
-                      angle: tilt,
-                      alignment: Alignment.topCenter,
-                      child: BookWidget(
-                        title: book.title,
-                        width: book.width,
-                        height: 200,
-                      ),
-                    ),
+                Positioned.fill(
+                  child: Image.asset(
+                    'assets/shelf.png',
+                    fit: BoxFit.fill,
+                    filterQuality: FilterQuality.none,
                   ),
                 ),
-              );
-            }),
-          ],
+
+                ...books.map((book) {
+                  final bool isHeld = _heldBook == book;
+
+                  double x, y;
+                  double tilt = 0.0;
+
+                  if (isHeld && _physics != null) {
+                    x = _physics!.displayPosition.dx;
+                    y = _physics!.displayPosition.dy;
+                    tilt = _physics!.tiltAngle;
+                  } else {
+                    x = book.pos?.x ?? Utils.getPos(book.location).$1;
+                    y = book.pos?.y ?? Utils.getPos(book.location).$2;
+                  }
+
+                  return Positioned(
+                    left: x,
+                    bottom: MediaQuery.sizeOf(context).height - y,
+
+                    child: GestureDetector(
+                      onLongPressStart: (_) => _onBookHoldStart(book),
+                      onLongPressMoveUpdate: isHeld ? _onDragUpdate : null,
+                      onLongPressEnd: (_) => _onBookHoldEnd(book, _dragPosition, shelfIndex),
+                      onLongPressCancel: () => _onBookHoldEnd(book, _dragPosition, shelfIndex),
+
+                      child: AnimatedScale(
+                        scale: isHeld ? 1.08 : 1.0,
+                        duration: const Duration(milliseconds: 150),
+                        curve: Curves.easeOut,
+                        alignment: Alignment.bottomCenter,
+
+                        child: Transform.rotate(
+                          angle: tilt,
+                          alignment: Alignment.bottomCenter,
+                          child: BookWidget(
+                            title: book.title,
+                            width: book.width,
+                            height: 200,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+
+              ],
+            ),
+          ),
         ),
-      ),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: screenHeight * 0.1,
+          child: AnimatedOpacity(
+            opacity: _heldBook != null ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 200),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: _isOverDropZone
+                      ? [
+                          Colors.amber.withOpacity(0.5),
+                          Colors.amber.withOpacity(0.1),
+                        ]
+                      : [
+                          Colors.white.withOpacity(0.15),
+                          Colors.white.withOpacity(0.0),
+                        ],
+                ),
+              ),
+              child: Center(
+                child: AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 150),
+                  style: TextStyle(
+                    color: _isOverDropZone
+                        ? Colors.amber.shade300
+                        : Colors.white54,
+                    fontSize: 13,
+                    fontWeight: _isOverDropZone
+                        ? FontWeight.w700
+                        : FontWeight.w400,
+                    letterSpacing: 1.5,
+                  ),
+                  child: const Text('DROP ON DESK'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
