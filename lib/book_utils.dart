@@ -163,6 +163,16 @@ class Utils{
     return (tmpX, tmpY);
   }
 
+  static List<double> getShelfPos(){
+    double runningTotal = Constants.initialYMargin;
+    List<double> result = List.empty(growable: true);
+    for (int i = 0; i < Constants.shelfCount-1; i++){
+      runningTotal += Constants.shelfHeight;
+      result.add(runningTotal);
+    }
+    return result;
+  }
+
   static double toLocation(double x, double y, int bookshelfNo){
     int shelf = ((y - Constants.initialYMargin) ~/ Constants.shelfHeight);
     return x + (shelf * shelfThreshold) + (bookshelfNo * bookshelfThreshold);
