@@ -79,7 +79,6 @@ class _BookWidgetState extends State<BookWidget> {
             ..rotateY(_isHovered ? 1 : 0),
           child: Stack(
             children: [
-              // ── Main spine face ──────────────────────────────────────
               Positioned(
                 left: widget.width * 0.08,
                 top: 0,
@@ -95,51 +94,9 @@ class _BookWidgetState extends State<BookWidget> {
                       : _coverBytes != null
                           ? Image.memory(
                               _coverBytes!,
-                              fit: BoxFit.fill, // squish cover into spine shape
                               filterQuality: FilterQuality.medium,
                             )
                           : _fallback(),
-                ),
-              ),
-
-              // ── Binding shadow on left edge ──────────────────────────
-              Positioned(
-                left: 0,
-                top: 0,
-                bottom: 0,
-                child: Container(
-                  width: widget.width * 0.1,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        Colors.brown.shade800,
-                        Colors.brown.shade600,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              // ── Page sheen on right edge ─────────────────────────────
-              Positioned(
-                right: 0,
-                top: 4,
-                bottom: 4,
-                child: Container(
-                  width: 3,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.grey.shade300,
-                        Colors.grey.shade100,
-                        Colors.grey.shade300,
-                      ],
-                    ),
-                  ),
                 ),
               ),
             ],
@@ -149,7 +106,6 @@ class _BookWidgetState extends State<BookWidget> {
     );
   }
 
-  // Grey animated placeholder shown while the cover loads
   Widget _placeholder() {
     return Container(
       decoration: BoxDecoration(
@@ -164,8 +120,8 @@ class _BookWidgetState extends State<BookWidget> {
       ),
       child: Center(
         child: SizedBox(
-          width: widget.width * 0.35,
-          height: widget.width * 0.35,
+          width: widget.width,
+          height: widget.width,
           child: CircularProgressIndicator(
             strokeWidth: 1.5,
             color: Colors.grey.shade300,
@@ -175,7 +131,6 @@ class _BookWidgetState extends State<BookWidget> {
     );
   }
 
-  // Amber fallback shown when cover fetch fails
   Widget _fallback() {
     return Container(
       decoration: BoxDecoration(
