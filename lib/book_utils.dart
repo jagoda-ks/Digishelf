@@ -40,9 +40,8 @@ class BookInfo {
   BookInfo(this.title, this.author, this.pageCount, this.pubDate, this.isbn, this.cover){
     this.width = Utils.getWidth(pageCount);
     this.coveredWidth = this.width;
-    this.location = Utils.getAvailablePos(this.width);
-    this.boundaries!.x = this.location-width/2;
-    this.boundaries!.x = this.location+width/2;
+    this.location = Utils.getNextAvailablePos(this.width);
+    this.boundaries = Vector2D(location-width/2, this.location+width/2);
     var tmp = Utils.getPos(this.location);
     this.bookshelfNo = tmp.$3;
     this.pos = Vector2D(tmp.$1, tmp.$2);
@@ -71,7 +70,7 @@ class Utils{
 
   static double adjustYWithRot() => shelfHeight;
 
-  static double getAvailablePos(double width){
+  static double getNextAvailablePos(double width){
     if (regionAvailability.isEmpty){
       regionAvailability.add(0);
       regionAvailability.add(width);
@@ -89,6 +88,25 @@ class Utils{
     }
 
     return regionAvailability[regionAvailability.length-1] + width/2;
+  }
+
+  static bool spaceAvailable(double location, double width){
+    if (regionAvailability.isEmpty){
+      return true;
+    }
+
+    bool isAvailable = true;
+
+    for (int i = 0; i < regionAvailability.length-1; i++){
+      isAvailable = !isAvailable;
+      if (regionAvailability[i] > location){
+        if (isAvailable && regionAvailability[i] - regionAvailability[i-1] > width){
+          return true;
+        }
+      }
+    }
+
+    return (isAvailable) ? true : false;
   }
 
   static void _updateBoundary(Vector2D boundaryVec){
