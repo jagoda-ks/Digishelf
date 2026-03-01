@@ -24,7 +24,7 @@ class BookInfo {
   double location = 0;
   double rot = 0;
   double width = Utils.widthPerPage * Utils.defaultPageCount;
-  double height = 10;
+  double height = 8;
   double coveredWidth = 0;
   Vector2D? pos;
   int bookshelfNo = 0;
@@ -46,6 +46,8 @@ class BookInfo {
     var tmp = Utils.getPos(this.location);
     this.bookshelfNo = tmp.$3;
     this.pos = Vector2D(tmp.$1, tmp.$2);
+    Random random = Random();
+    this.height += random.nextDouble() * 4;
     Utils.books.add(this);
   }
 }
@@ -68,7 +70,7 @@ class Utils{
   
   static const double bookshelfGap = 200;
   static const double shelfThreshold = 500;
-  static const double bookshelfThreshold = 200;
+  static const double bookshelfThreshold = 1000;
   static const double accuracyMeasure = 1e-4;
 
   static const double widthPerPage = 2; //Temp value
@@ -141,7 +143,7 @@ class Utils{
   static (double x, double y, int bookshelfNo) getPos(double location){
     int tempNo = location ~/ bookshelfThreshold;
     location = location % bookshelfThreshold;
-    double tempY = ((location ~/ shelfThreshold)) * Constants.shelfHeight;
+    double tempY = ((location ~/ shelfThreshold) + 1) * Constants.shelfHeight;
     double tempX = location % shelfThreshold;
     return (Constants.initialXMargin + tempX, Constants.initialYMargin + tempY, tempNo);
   }
