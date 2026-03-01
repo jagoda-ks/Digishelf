@@ -278,7 +278,7 @@ void initState() {
                           alignment: Alignment.bottomCenter,
                           child: BookWidget(
                             title: book.title,
-                            width: book.width,
+                            width: book.width * Utils.locationToPixel,
                             height: book.height,
                           ),
                         ),

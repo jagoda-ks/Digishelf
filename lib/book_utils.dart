@@ -23,7 +23,7 @@ class BookInfo {
   double location = 0;
   double rot = 0;
   double width = Utils.widthPerPage * Utils.defaultPageCount;
-  double height = 100;
+  double height = 80;
   double coveredWidth = 0;
   Vector2D? pos;
   int bookshelfNo = 0;
@@ -46,13 +46,14 @@ class BookInfo {
     this.bookshelfNo = tmp.$3;
     this.pos = Vector2D(tmp.$1, tmp.$2);
     Random random = Random();
-    this.height += random.nextDouble() * 20;
+    this.height += random.nextDouble() * 40;
     Utils.books.add(this);
     Utils.books.sort((a, b) => a.location.compareTo(b.location));
     if(Utils.bookshelfCount < this.bookshelfNo){
       Utils.bookshelfCount = this.bookshelfNo;
       Utils.addBoundaries(bookshelfNo);
     }
+    this.width = Utils.clamp(this.width, 10, 40);
   }
 }
 
@@ -137,6 +138,9 @@ class Utils{
     return (isAvailable) ? true : false;
   }
 
+  static double get locationToPixel => 
+    (Constants.width * 0.85) / Utils.shelfThreshold;
+
   static void _updateBoundary(Vector2D boundaryVec){
     int toRemoveX = -1;
     int toRemoveY = -1;
@@ -175,7 +179,9 @@ class Utils{
     location = location % bookshelfThreshold;
     double tempY = ((location ~/ shelfThreshold) + 1) * Constants.shelfHeight;
     double tempX = location % shelfThreshold;
-    return (Constants.initialXMargin + tempX, Constants.initialYMargin + tempY, tempNo);
+    return (Constants.initialXMargin + tempX * Utils.locationToPixel, 
+        Constants.initialYMargin + tempY, 
+        tempNo);
   }
 
   static (double x, double y) getClosestPos(double x, double y, double width){
@@ -206,7 +212,8 @@ class Utils{
     book.bookshelfNo = bookshelfNo;
     var tmp = getClosestPos(endPos.dx, endPos.dy, book.width);
     book.pos = Vector2D(tmp.$1, tmp.$2);
-    double numericX = ((book.pos!.x - Constants.initialXMargin)/(Constants.width * 2 * (1-Constants.marginXMultiplier)))*shelfThreshold;
+    double numericX = ((book.pos!.x - Constants.initialXMargin) / Utils.locationToPixel 
+                  / (Constants.width * 2 * (1 - Constants.marginXMultiplier))) * shelfThreshold;
     book.location = toLocation(numericX, book.pos!.y, bookshelfNo);
     return Vector2D(book.pos!.x, book.pos!.y);
   }
