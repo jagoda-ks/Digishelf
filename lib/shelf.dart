@@ -162,7 +162,7 @@ void _onBookHoldEnd(BookInfo book, Offset endPosition, int shelfIndex) {
 
               return Positioned(
                 left: x,
-                top: y,
+                bottom: MediaQuery.sizeOf(context).height - y,
 
                 child: GestureDetector(
                   onLongPressStart: (_) => _onBookHoldStart(book),
@@ -181,14 +181,13 @@ void _onBookHoldEnd(BookInfo book, Offset endPosition, int shelfIndex) {
                       child: BookWidget(
                         title: book.title,
                         width: book.width,
-                        height: 100,
+                        height: 200,
                       ),
                     ),
                   ),
                 ),
               );
             }),
-
           ],
         ),
       ),
