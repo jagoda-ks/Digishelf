@@ -5,6 +5,7 @@ import 'book_utils.dart';
 import 'book_widget.dart';
 import 'desk.dart';
 import 'package:flutter/scheduler.dart';
+import 'main.dart';
 
 class ShelfPage extends StatefulWidget {
   const ShelfPage({super.key, required this.title});
@@ -51,12 +52,12 @@ class _DragPhysics {
   }
 }
 
-// Defines the asset and top position for each shelf plank.
-const List<(String asset, double top)> _shelfPlanks = [
-  ('assets/Shelf1.png', 100),
-  ('assets/Shelf2.png', 200),
-  ('assets/Shelf3.png', 300),
-  ('assets/Shelf3.png', 400),
+
+
+List<(String asset, double top)> _shelfPlanks = [
+  ('assets/Shelf4.png', shelfPos[0]),
+  ('assets/Shelf2.png', shelfPos[1]),
+  ('assets/Shelf3.png', shelfPos[2]),
 ];
 
 class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMixin {
@@ -94,6 +95,26 @@ void initState() {
     Utils.books.clear();
     Utils.regionAvailability.clear();
     result.add([
+      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
+      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
+      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
+      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
+      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
+      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
+      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
+      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
+      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
+      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
+      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
+      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
+      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
+      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
+      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
+      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
+      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
+      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
+      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
+      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
       BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
       BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
     ]);
@@ -179,8 +200,6 @@ void initState() {
     );
   }
 
-  /// Builds the shelf plank widgets from the [_shelfPlanks] constant,
-  /// so they render behind books in the Stack.
   List<Widget> _buildShelfPlanks(BuildContext context) {
     final double horizontalInset = MediaQuery.sizeOf(context).width * 0.055;
     return _shelfPlanks.map((plank) {
@@ -220,7 +239,6 @@ void initState() {
                   ),
                 ),
 
-                // Shelf planks rendered before books so they appear behind them.
                 ..._buildShelfPlanks(context),
 
                 ...books.map((book) {
@@ -240,7 +258,7 @@ void initState() {
 
                   return Positioned(
                     left: x,
-                    top: y,
+                    bottom:  MediaQuery.sizeOf(context).height - y,
 
                     child: GestureDetector(
                       onLongPressStart: (_) => _onBookHoldStart(book),

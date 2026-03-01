@@ -24,7 +24,7 @@ class BookInfo {
   double location = 0;
   double rot = 0;
   double width = Utils.widthPerPage * Utils.defaultPageCount;
-  double height = 8;
+  double height = 100;
   double coveredWidth = 0;
   Vector2D? pos;
   int bookshelfNo = 0;
@@ -47,7 +47,7 @@ class BookInfo {
     this.bookshelfNo = tmp.$3;
     this.pos = Vector2D(tmp.$1, tmp.$2);
     Random random = Random();
-    this.height += random.nextDouble() * 4;
+    this.height += random.nextDouble() * 20;
     Utils.books.add(this);
   }
 }
@@ -164,7 +164,7 @@ class Utils{
   }
 
   static List<double> getShelfPos(){
-    double runningTotal = Constants.initialYMargin;
+    double runningTotal = Constants.initialYMargin - 10;
     List<double> result = List.empty(growable: true);
     for (int i = 0; i < Constants.shelfCount-1; i++){
       runningTotal += Constants.shelfHeight;

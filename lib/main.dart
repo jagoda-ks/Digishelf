@@ -7,12 +7,15 @@ void main() {
   runApp(const MyApp());
 }
 
+List<double> shelfPos = Utils.getShelfPos();
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     Constants.updateShelfHeight(MediaQuery.sizeOf(context).height, MediaQuery.sizeOf(context).width);
+    shelfPos = Utils.getShelfPos();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: PixelateFilter(
