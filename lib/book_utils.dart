@@ -27,6 +27,7 @@ class BookInfo {
   double coveredWidth = 0;
   Vector2D? pos;
   int bookshelfNo = 0;
+  Vector2D? boundaries;
 
   int pageCount;
   String isbn;
@@ -40,8 +41,8 @@ class BookInfo {
     this.width = Utils.getWidth(pageCount);
     this.coveredWidth = this.width;
     this.location = Utils.getAvailablePos(this.width);
-    Utils.regionAvailability.add(this.location-width/2);
-    Utils.regionAvailability.add(this.location+width/2);
+    this.boundaries!.x = this.location-width/2;
+    this.boundaries!.x = this.location+width/2;
     var tmp = Utils.getPos(this.location);
     this.bookshelfNo = tmp.$3;
     this.pos = Vector2D(tmp.$1, tmp.$2);
@@ -59,6 +60,7 @@ class Utils{
   static const double bookshelfGap = 200;
   static const double shelfThreshold = 500;
   static const double bookshelfThreshold = 200;
+  static const double accuracyMeasure = 1e-4;
 
   static const double widthPerPage = 2; //Temp value
   static const int defaultPageCount = 50; //If returns null
@@ -76,17 +78,36 @@ class Utils{
       return width/2;
     }
 
-
     bool isAvailable = true;
 
     for (int i = 0; i < regionAvailability.length-1; i++){
       isAvailable = !isAvailable;
       if (isAvailable && regionAvailability[i+1] - regionAvailability[i] > width){
+        _updateBoundary(Vector2D(regionAvailability[i], regionAvailability[i] + width));
         return regionAvailability[i] + width/2;
       }
     }
 
     return regionAvailability[regionAvailability.length-1] + width/2;
+  }
+
+  static void _updateBoundary(Vector2D boundaryVec){
+    int toRemoveX = -1;
+    int toRemoveY = -1;
+    for(int i = 0; i<regionAvailability.length; i++){
+      if(regionAvailability[i] - boundaryVec.x < accuracyMeasure){
+        toRemoveX = i;
+      }
+      else if (regionAvailability[i] - boundaryVec.y < accuracyMeasure){
+        toRemoveY = i;
+      }
+    }
+
+    if (toRemoveX == -1) { regionAvailability.add(boundaryVec.x); }
+    else { regionAvailability.removeAt(toRemoveX); }
+
+    if (toRemoveY == -1) { regionAvailability.add(boundaryVec.y); }
+    else { regionAvailability.removeAt(toRemoveY); }
   }
 
   static (double x, double y, int bookshelfNo) getPos(double location){
