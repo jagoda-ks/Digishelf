@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'book_utils.dart';
 import 'book_widget.dart';
-import 'package:flutter_physics/flutter_physics.dart';
 import 'package:flutter/scheduler.dart';
 
 class ShelfPage extends StatefulWidget {
@@ -116,16 +115,16 @@ class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMix
     });
   }
 
-  void _onBookHoldEnd(BookInfo book, Offset endPosition) {
+  void _onBookHoldEnd(BookInfo book, Offset endPosition, int shelfIndex) {
     _ticker.stop();
     setState(() {
       _heldBook = null;
       _physics = null;
     });
-    // TODO: snap to nearest available position using endPosition
+    // TODO: snap to nearest available position using endPosition on shelfIndex
   }
 
-  Widget buildShelf(List<BookInfo> books) {
+  Widget buildShelf(List<BookInfo> books, int shelfIndex) {
     return Center(
       child: SizedBox(
         width: MediaQuery.sizeOf(context).width * 0.9,
@@ -164,8 +163,8 @@ class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMix
                 child: GestureDetector(
                   onLongPressStart: (_) => _onBookHoldStart(book),
                   onLongPressMoveUpdate: isHeld ? _onDragUpdate : null,
-                  onLongPressEnd: (_) => _onBookHoldEnd(book, _dragPosition),
-                  onLongPressCancel: () => _onBookHoldEnd(book, _dragPosition),
+                  onLongPressEnd: (_) => _onBookHoldEnd(book, _dragPosition, shelfIndex),
+                  onLongPressCancel: () => _onBookHoldEnd(book, _dragPosition, shelfIndex),
 
                   child: AnimatedScale(
                     scale: isHeld ? 1.08 : 1.0,
@@ -199,7 +198,7 @@ class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMix
         scrollDirection: Axis.horizontal,
         itemCount: shelves.length,
         itemBuilder: (context, index) {
-          return buildShelf(shelves[index]);
+          return buildShelf(shelves[index], index);
         },
       ),
     );
