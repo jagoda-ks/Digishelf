@@ -70,20 +70,17 @@ class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMix
 
   bool _isOverDropZone = false;
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Constants.updateShelfHeight(MediaQuery.sizeOf(context).height);
-    });
-    _ticker = createTicker((_elapsed) {
-      if (_physics != null) {
-        setState(() {
-          _physics!.tick(_elapsed);
-        });
-      }
-    });
-  }
+@override
+void initState() {
+  super.initState();
+  _ticker = createTicker((_elapsed) {
+    if (_physics != null) {
+      setState(() {
+        _physics!.tick(_elapsed);
+      });
+    }
+  });
+}
 
   @override
   void dispose() {

@@ -53,14 +53,20 @@ class BookInfo {
 }
 
 class Constants{
+  static double height = 0;
+  static double width = 0;
   static double shelfHeight = 0;
   static const shelfCount = 4;
+  static const marginXMultiplier = 0.08;
 
-  static const double initialXMargin = 80;
-  static const double initialYMargin = 20;
+  static double initialXMargin = 80;
+  static double initialYMargin = 20;
 
-  static void updateShelfHeight(double screenHeight){
+  static void updateShelfHeight(double screenHeight, double screenWidth){
+    height = screenHeight;
+    width = screenWidth;
     shelfHeight = (screenHeight - 2*initialYMargin)/shelfCount;
+    initialXMargin = (screenWidth * marginXMultiplier);
   }
 }
 
@@ -69,8 +75,8 @@ class Utils{
   Utils._();
   
   static const double bookshelfGap = 200;
-  static const double shelfThreshold = 500;
-  static const double bookshelfThreshold = 1000;
+  static const double shelfThreshold = 100;
+  static const double bookshelfThreshold = 200;
   static const double accuracyMeasure = 1e-4;
 
   static const double widthPerPage = 2; //Temp value
@@ -148,8 +154,9 @@ class Utils{
     return (Constants.initialXMargin + tempX, Constants.initialYMargin + tempY, tempNo);
   }
 
-  static (double x, double y) getClosestPos(double x, double y){
-    double tmpX = Utils.clamp(x, 0, shelfThreshold);
+  static (double x, double y) getClosestPos(double x, double y, double width){
+    double tmpX = Utils.clamp(x, Constants.initialXMargin, 
+        (Constants.width * (1 - Constants.marginXMultiplier))-width-Constants.initialXMargin);
     double tmpY = (((((y-Constants.initialYMargin).clamp(
       Constants.initialYMargin+Constants.shelfHeight, Constants.shelfCount * Constants.shelfHeight) 
                 + Constants.shelfHeight / 2) ~/ Constants.shelfHeight)) * Constants.shelfHeight) + Constants.initialYMargin;
@@ -163,9 +170,10 @@ class Utils{
 
   static Vector2D updatePos(BookInfo book, Offset endPos, int bookshelfNo){
     book.bookshelfNo = bookshelfNo;
-    var tmp = getClosestPos(endPos.dx, endPos.dy);
+    var tmp = getClosestPos(endPos.dx, endPos.dy, book.width);
     book.pos = Vector2D(tmp.$1, tmp.$2);
-    book.location = toLocation(book.pos!.x, book.pos!.y, bookshelfNo);
+    double numericX = ((book.pos!.x - Constants.initialXMargin)/(Constants.width * 2 * Constants.marginXMultiplier))*shelfThreshold;
+    book.location = toLocation(numericX, book.pos!.y, bookshelfNo);
     return Vector2D(book.pos!.x, book.pos!.y);
   }
 
