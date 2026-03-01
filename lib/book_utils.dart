@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:math';
+import 'shelf.dart' as shelf;
 
 void main() async{
   
@@ -41,7 +42,7 @@ class BookInfo {
     this.width = Utils.getWidth(pageCount);
     this.coveredWidth = this.width;
     this.location = Utils.getNextAvailablePos(this.width);
-    this.boundaries = Vector2D(location-width/2, this.location+width/2);
+    this.boundaries = Vector2D(location, this.location+width);
     var tmp = Utils.getPos(this.location);
     this.bookshelfNo = tmp.$3;
     this.pos = Vector2D(tmp.$1, tmp.$2);
@@ -49,13 +50,24 @@ class BookInfo {
   }
 }
 
+class Constants{
+  static double shelfHeight = 0;
+  static const shelfCount = 4;
+
+  static const double initialXMargin = 20;
+  static const double initialYMargin = 80;
+
+  static void updateShelfHeight(double screenHeight){
+    shelfHeight = (screenHeight - 2*initialYMargin)/shelfCount;
+  }
+}
+
 class Utils{
   
   Utils._();
 
-  static const double initialXMargin = 20;
-  static const double initialYMargin = 80;
-  static const double shelfHeight = 120;
+  
+  
   static const double bookshelfGap = 200;
   static const double shelfThreshold = 500;
   static const double bookshelfThreshold = 200;
@@ -68,13 +80,13 @@ class Utils{
 
   static double getWidth(int pages) => widthPerPage * pages;
 
-  static double adjustYWithRot() => shelfHeight;
+  static double adjustYWithRot() => Constants.shelfHeight;
 
   static double getNextAvailablePos(double width){
     if (regionAvailability.isEmpty){
       regionAvailability.add(0);
       regionAvailability.add(width);
-      return width/2;
+      return 0;
     }
 
     bool isAvailable = true;
@@ -83,11 +95,11 @@ class Utils{
       isAvailable = !isAvailable;
       if (isAvailable && regionAvailability[i+1] - regionAvailability[i] > width){
         _updateBoundary(Vector2D(regionAvailability[i], regionAvailability[i] + width));
-        return regionAvailability[i] + width/2;
+        return regionAvailability[i];
       }
     }
 
-    return regionAvailability[regionAvailability.length-1] + width/2;
+    return regionAvailability[regionAvailability.length-1];
   }
 
   static bool spaceAvailable(double location, double width){
@@ -131,19 +143,20 @@ class Utils{
   static (double x, double y, int bookshelfNo) getPos(double location){
     int tempNo = location ~/ bookshelfThreshold;
     location = location % bookshelfThreshold;
-    double tempY = (location ~/ shelfThreshold) * shelfHeight;
+    double tempY = ((location ~/ shelfThreshold)+1) * Constants.shelfHeight;
     double tempX = location % shelfThreshold;
-    return (initialXMargin + tempX, initialYMargin + tempY, tempNo);
+    return (Constants.initialXMargin + tempX, Constants.initialYMargin + tempY, tempNo);
   }
 
   static (double x, double y) getClosestPos(double x, double y){
     double tmpX = Utils.clamp(x, 0, shelfThreshold);
-    double tmpY = ((y ~/ shelfHeight) * shelfHeight) + initialYMargin;
+    double tmpY = (((((y-Constants.initialYMargin < 0) ? y : y-Constants.initialYMargin) ~/ Constants.shelfHeight)+1) 
+                                                          * Constants.shelfHeight) + Constants.initialYMargin;
     return (tmpX, tmpY);
   }
 
   static double toLocation(double x, double y, int bookshelfNo){
-    return (x+((y~/shelfHeight) * shelfThreshold)+bookshelfNo*bookshelfThreshold);
+    return (x+(((y~/Constants.shelfHeight)-1) * shelfThreshold)+bookshelfNo*bookshelfThreshold);
   }
 
   static Vector2D updatePos(BookInfo book, Offset endPos, int bookshelfNo){
