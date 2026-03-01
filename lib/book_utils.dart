@@ -47,7 +47,7 @@ class BookInfo {
       Utils.bookshelfCount = this.bookshelfNo;
       PlacementManager.addBoundaries(bookshelfNo);
     }
-    print(this.location);
+    print("Location: ${this.location}");
   }
 
   double getWidth(int pages) => Utils.maxWidth *

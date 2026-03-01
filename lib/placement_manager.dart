@@ -27,8 +27,10 @@ class PlacementManager {
 
   static double getNextAvailablePos(double width){
     if (regionAvailability.isEmpty){
+      PlacementManager.addBoundaries(0);
       regionAvailability.add(0);
       regionAvailability.add(width);
+      
       return 0;
     }
 
@@ -42,9 +44,9 @@ class PlacementManager {
       }
     }
 
-    _updateBoundary(Vector2D(regionAvailability[regionAvailability.length-1], 
-                      regionAvailability[regionAvailability.length-1] + width));
-    return regionAvailability[regionAvailability.length-1];
+    double temp = regionAvailability[regionAvailability.length-1];
+    _updateBoundary(Vector2D(temp, temp + width));
+    return temp;
   }
 
   static void _updateBoundary(Vector2D boundaryVec){
@@ -69,14 +71,17 @@ class PlacementManager {
       else { regionAvailability.removeAt(toRemoveY); }
     }
 
+    regionAvailability.sort();
+
     print(regionAvailability.toString());
   }
 
   static void addBoundaries(int bookshelfNo){
-    double edge = Utils.shelfThreshold + (Utils.bookshelfThreshold * (bookshelfNo-1));
+    double composite = (Constants.width * (1 - Constants.marginXMultiplier))-Constants.initialXMargin*1.1;
+    double edge = composite + (Utils.bookshelfThreshold * (bookshelfNo));
     for (int i = 0; i < Constants.shelfCount; i++){
       _updateBoundary(Vector2D(edge, edge + 1));
-      edge += Utils.shelfThreshold;
+      edge +=  composite;
     }
   }
 }
