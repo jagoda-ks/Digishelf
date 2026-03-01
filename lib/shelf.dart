@@ -51,6 +51,14 @@ class _DragPhysics {
   }
 }
 
+// Defines the asset and top position for each shelf plank.
+const List<(String asset, double top)> _shelfPlanks = [
+  ('assets/Shelf1.png', 100),
+  ('assets/Shelf2.png', 200),
+  ('assets/Shelf3.png', 300),
+  ('assets/Shelf3.png', 400),
+];
+
 class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMixin {
   final List<List<BookInfo>> shelves = _buildShelves();
 
@@ -62,26 +70,26 @@ class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMix
 
   bool _isOverDropZone = false;
 
-@override
-void initState() {
-  super.initState();
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    Constants.updateShelfHeight(MediaQuery.sizeOf(context).height);
-  });
-  _ticker = createTicker((_elapsed) {
-    if (_physics != null) {
-      setState(() {
-        _physics!.tick(_elapsed);
-      });
-    }
-  });
-}
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Constants.updateShelfHeight(MediaQuery.sizeOf(context).height);
+    });
+    _ticker = createTicker((_elapsed) {
+      if (_physics != null) {
+        setState(() {
+          _physics!.tick(_elapsed);
+        });
+      }
+    });
+  }
 
-@override
-void dispose() {
-  _ticker.dispose();
-  super.dispose();
-}
+  @override
+  void dispose() {
+    _ticker.dispose();
+    super.dispose();
+  }
 
   static List<List<BookInfo>> _buildShelves() {
     final List<List<BookInfo>> result = [];
@@ -174,6 +182,26 @@ void dispose() {
     );
   }
 
+  /// Builds the shelf plank widgets from the [_shelfPlanks] constant,
+  /// so they render behind books in the Stack.
+  List<Widget> _buildShelfPlanks(BuildContext context) {
+    final double horizontalInset = MediaQuery.sizeOf(context).width * 0.055;
+    return _shelfPlanks.map((plank) {
+      final (asset, top) = plank;
+      return Positioned(
+        top: top,
+        left: horizontalInset,
+        right: horizontalInset,
+        height: 40,
+        child: Image.asset(
+          asset,
+          fit: BoxFit.fill,
+          filterQuality: FilterQuality.none,
+        ),
+      );
+    }).toList();
+  }
+
   Widget buildShelf(List<BookInfo> books, int shelfIndex) {
     final screenHeight = MediaQuery.sizeOf(context).height;
 
@@ -195,6 +223,9 @@ void dispose() {
                   ),
                 ),
 
+                // Shelf planks rendered before books so they appear behind them.
+                ..._buildShelfPlanks(context),
+
                 ...books.map((book) {
                   final bool isHeld = _heldBook == book;
 
@@ -212,7 +243,7 @@ void dispose() {
 
                   return Positioned(
                     left: x,
-                    bottom: MediaQuery.sizeOf(context).height - y,
+                    top: y,
 
                     child: GestureDetector(
                       onLongPressStart: (_) => _onBookHoldStart(book),
@@ -232,7 +263,7 @@ void dispose() {
                           child: BookWidget(
                             title: book.title,
                             width: book.width,
-                            height: 100,
+                            height: book.height,
                           ),
                         ),
                       ),
@@ -257,11 +288,10 @@ void dispose() {
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
-                  colors: 
-                       [
-                          const Color.fromARGB(255, 112, 64, 10).withOpacity(0.8),
-                          const Color.fromARGB(255, 107, 57, 1).withOpacity(0.9),
-                        ]
+                  colors: [
+                    const Color.fromARGB(255, 112, 64, 10).withOpacity(0.8),
+                    const Color.fromARGB(255, 107, 57, 1).withOpacity(0.9),
+                  ],
                 ),
               ),
               child: Center(
