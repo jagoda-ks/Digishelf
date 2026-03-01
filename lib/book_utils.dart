@@ -54,12 +54,10 @@ class Utils{
   Utils._();
 
   static const double initialXMargin = 20;
-  static const double initialYMargin = 30;
-
-  static const double shelfHeight = 50;
+  static const double initialYMargin = 80;
+  static const double shelfHeight = 120;
   static const double bookshelfGap = 200;
-
-  static const double shelfThreshold = 50;
+  static const double shelfThreshold = 500;
   static const double bookshelfThreshold = 200;
 
   static const double widthPerPage = 2; //Temp value
