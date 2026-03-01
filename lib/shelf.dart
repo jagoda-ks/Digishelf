@@ -70,6 +70,7 @@ class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMix
   late final Ticker _ticker;
 
   bool _isOverDropZone = false;
+  bool _hasDragged = false;
 
 @override
 void initState() {
@@ -92,38 +93,32 @@ void initState() {
   static List<List<BookInfo>> _buildShelves() {
     final List<List<BookInfo>> result = [];
 
+    // Each BookInfo(title, author, pageCount, pubDate, isbn, cover)
+    // width is computed inside BookInfo as: Utils.getWidth(pageCount)
+    // which equals Utils.widthPerPage * pageCount (2.0 * pages)
     Utils.books.clear();
     Utils.regionAvailability.clear();
     result.add([
-      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
-      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
-      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
-      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
-      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
-      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
-      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
-      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
-      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
-      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
-      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
-      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
-      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
-      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
-      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
-      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
-      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
-      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
-      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
-      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
-      BookInfo("Book A", "cillian", 20, "2020", "3932850238", null),
-      BookInfo("Book B", "cillian", 12, "2021", "1234567890", null),
+      BookInfo("The Hobbit",              "J.R.R. Tolkien",   310, "1937", "9780261102217", null),
+      BookInfo("1984",                    "George Orwell",    328, "1949", "9780451524935", null),
+      BookInfo("Dune",                    "Frank Herbert",    688, "1965", "9780441013593", null),
+      BookInfo("Fahrenheit 451",          "Ray Bradbury",     158, "1953", "9781451673319", null),
+      BookInfo("Brave New World",         "Aldous Huxley",    311, "1932", "9780060850524", null),
+      BookInfo("The Great Gatsby",        "F. Scott Fitzgerald", 180, "1925", "9780743273565", null),
+      BookInfo("To Kill a Mockingbird",   "Harper Lee",       281, "1960", "9780061120084", null),
+      BookInfo("Crime and Punishment",    "Fyodor Dostoevsky",551, "1866", "9780679720201", null),
+      BookInfo("The Odyssey",             "Homer",            374, "800BC","9780140449136", null),
+      BookInfo("Pride and Prejudice",     "Jane Austen",      432, "1813", "9780141439518", null),
     ]);
 
     Utils.books.clear();
     Utils.regionAvailability.clear();
     result.add([
-      BookInfo("Book C", "cillian", 18, "2022", "9999999999", null),
-      BookInfo("Book D", "cillian", 9,  "2023", "8888888888", null),
+      BookInfo("Harry Potter 1",          "J.K. Rowling",     309, "1997", "9780439708180", null),
+      BookInfo("The Hunger Games",        "Suzanne Collins",  374, "2008", "9780439023481", null),
+      BookInfo("The Road",                "Cormac McCarthy",  287, "2006", "9780307277671", null),
+      BookInfo("Ender's Game",            "Orson Scott Card", 352, "1985", "9780812550702", null),
+      BookInfo("The Alchemist",           "Paulo Coelho",     208, "1988", "9780062315007", null),
     ]);
 
     return result;
@@ -139,6 +134,7 @@ void initState() {
     setState(() {
       _heldBook = book;
       _dragPosition = startPos;
+      _hasDragged = false;
       _physics = _DragPhysics(startPos);
       _isOverDropZone = false;
     });
@@ -153,6 +149,7 @@ void initState() {
     final bool overZone = _isInDropZone(details.globalPosition);
 
     setState(() {
+      _hasDragged = true;
       _dragPosition = newPos;
       _physics!.update(newPos);
       _isOverDropZone = overZone;
@@ -167,6 +164,7 @@ void initState() {
         _heldBook = null;
         _physics = null;
         _isOverDropZone = false;
+        _hasDragged = false;
       });
       _openDesk(book);
     } else {
@@ -175,8 +173,11 @@ void initState() {
         _physics = null;
         _isOverDropZone = false;
       });
-      final tmp = Utils.updatePos(book, endPosition, shelfIndex);
-      book.pos = tmp;
+      if (_hasDragged) {
+        final tmp = Utils.updatePos(book, endPosition, shelfIndex);
+        book.pos = tmp;
+      }
+      _hasDragged = false;
     }
   }
 
