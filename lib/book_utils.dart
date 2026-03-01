@@ -65,8 +65,6 @@ class Constants{
 class Utils{
   
   Utils._();
-
-  
   
   static const double bookshelfGap = 200;
   static const double shelfThreshold = 500;
@@ -156,7 +154,8 @@ class Utils{
   }
 
   static double toLocation(double x, double y, int bookshelfNo){
-    return (x+(((y~/Constants.shelfHeight)-1) * shelfThreshold)+bookshelfNo*bookshelfThreshold);
+    int shelf = ((y - Constants.initialYMargin) ~/ Constants.shelfHeight) - 1;
+    return x + (shelf * shelfThreshold) + (bookshelfNo * bookshelfThreshold);
   }
 
   static Vector2D updatePos(BookInfo book, Offset endPos, int bookshelfNo){
