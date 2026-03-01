@@ -2,6 +2,7 @@
 
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:math';
 
@@ -54,10 +55,13 @@ class Utils{
 
   static const double initialXMargin = 20;
   static const double initialYMargin = 30;
+
   static const double shelfHeight = 50;
   static const double bookshelfGap = 200;
+
   static const double shelfThreshold = 50;
   static const double bookshelfThreshold = 200;
+
   static const double widthPerPage = 2; //Temp value
   static const int defaultPageCount = 50; //If returns null
   static List<BookInfo> books = List.empty(growable: true);
@@ -95,14 +99,22 @@ class Utils{
     return (initialXMargin + tempX, initialYMargin + tempY, tempNo);
   }
 
-  static (double x, double y, int bookshelfNo) getClosestPos(double x, double y){
+  static (double x, double y) getClosestPos(double x, double y){
     double tmpX = Utils.clamp(x, 0, shelfThreshold);
-    double tmpY = y - (y % shelfHeight);
-    return (2, 2, 2);
+    double tmpY = ((y ~/ shelfHeight) * shelfHeight) + initialYMargin;
+    return (tmpX, tmpY);
   }
 
-  static void updatePos(BookInfo book, double newLocation){
+  static double toLocation(double x, double y, int bookshelfNo){
+    return (x+((y~/shelfHeight) * shelfThreshold)+bookshelfNo*bookshelfThreshold);
+  }
 
+  static Vector2D updatePos(BookInfo book, Offset endPos, int bookshelfNo){
+    book.bookshelfNo = bookshelfNo;
+    var tmp = getClosestPos(endPos.dx, endPos.dy);
+    book.pos = Vector2D(tmp.$1, tmp.$2);
+    book.location = toLocation(book.pos!.x, book.pos!.y, bookshelfNo);
+    return Vector2D(book.pos!.x, book.pos!.y);
   }
 
   static Future<BookInfo> fetchBook(String isbn) async{
