@@ -277,6 +277,7 @@ void initState() {
                             title: book.title,
                             width: book.width * Utils.locationToPixel,
                             height: book.height,
+                            isbn: book.isbn,
                           ),
                         ),
                       ),
