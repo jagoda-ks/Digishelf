@@ -10,7 +10,7 @@ void main() async{
   BookInfo a = await Utils.fetchBook("9786055794804");
   print(a.location);
   print(a.width);
-  BookInfo b = await Utils.fetchBook("9786055794804");
+  BookInfo b = await Utils.fetchBook("9781472154668");
   print(b.location);
   print(b.width);
 
@@ -95,6 +95,16 @@ class Utils{
     return (initialXMargin + tempX, initialYMargin + tempY, tempNo);
   }
 
+  static (double x, double y, int bookshelfNo) getClosestPos(double x, double y){
+    double tmpX = Utils.clamp(x, 0, shelfThreshold);
+    double tmpY = y - (y % shelfHeight);
+    return (2, 2, 2);
+  }
+
+  static void updatePos(BookInfo book, double newLocation){
+
+  }
+
   static Future<BookInfo> fetchBook(String isbn) async{
     final results = await http.get(Uri.parse('https://openlibrary.org/api/books?bibkeys=ISBN:$isbn&jscmd=data&format=json'));
     final Map<String, dynamic> info = jsonDecode(results.body);
@@ -110,6 +120,12 @@ class Utils{
                              isbn, coverBytes);
     return temp;
   }
+
+  static double clamp(double variable, double min, double max){
+        if (variable <= max && variable >= min){return variable;}
+        else if (variable > max) {return max;}
+        else {return min;}
+    }
 
 }
 
