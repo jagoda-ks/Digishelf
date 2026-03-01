@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: PixelateFilter(
-        pixelSize: 5.0,
+        pixelSize: 3.0,
         child: const ShelfPage(title: 'Digishelf'),
       ),
     );

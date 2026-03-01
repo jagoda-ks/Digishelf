@@ -26,7 +26,6 @@ class PlacementManager {
   }
 
   static double getNextAvailablePos(double width){
-    print(regionAvailability.toString());
     if (regionAvailability.isEmpty){
       regionAvailability.add(0);
       regionAvailability.add(width);
@@ -36,7 +35,6 @@ class PlacementManager {
     bool isAvailable = (regionAvailability.length % 2 == 0);
 
     for (int i = 0; i < regionAvailability.length-1; i++){
-      print(isAvailable);
       isAvailable = !isAvailable;
       if (isAvailable && regionAvailability[i+1] - regionAvailability[i] > width){
         _updateBoundary(Vector2D(regionAvailability[i], regionAvailability[i] + width));
@@ -61,8 +59,6 @@ class PlacementManager {
       }
     }
 
-    print(toRemoveX);
-
     if(toRemoveX != 0){
       if (toRemoveX == -1) { regionAvailability.add(boundaryVec.x); }
       else { regionAvailability.removeAt(toRemoveX); }
@@ -72,6 +68,8 @@ class PlacementManager {
       if (toRemoveY == -1) { regionAvailability.add(boundaryVec.y); }
       else { regionAvailability.removeAt(toRemoveY); }
     }
+
+    print(regionAvailability.toString());
   }
 
   static void addBoundaries(int bookshelfNo){

@@ -9,12 +9,7 @@ import 'dart:math';
 
 void main() async{
   
-  BookInfo a = await Utils.fetchBook("9786055794804");
-  print(a.location);
-  print(a.width);
-  BookInfo b = await Utils.fetchBook("9781472154668");
-  print(b.location);
-  print(b.width);
+  
 
   //print(Utils.getPos(6132).$1);
 
@@ -24,7 +19,7 @@ class BookInfo {
   double location = 0;
   double rot = 0;
   double width = Constants.widthPerPage * Constants.defaultPageCount;
-  double height = 80;
+  double height = 90;
   Vector2D? pos;
   int bookshelfNo = 0;
   Vector2D? boundaries;
@@ -45,13 +40,14 @@ class BookInfo {
     this.bookshelfNo = tmp.$3;
     this.pos = Vector2D(tmp.$1, tmp.$2);
     Random random = Random();
-    this.height += random.nextDouble() * 40;
+    this.height += random.nextDouble() * 20;
     Utils.books.add(this);
     Utils.books.sort((a, b) => a.location.compareTo(b.location));
     if(Utils.bookshelfCount < this.bookshelfNo){
       Utils.bookshelfCount = this.bookshelfNo;
       PlacementManager.addBoundaries(bookshelfNo);
     }
+    print(this.location);
   }
 
   double getWidth(int pages) => Utils.maxWidth *
@@ -87,7 +83,7 @@ class Utils{
   Utils._();
   
   static const double bookshelfGap = 200;
-  static const double shelfThreshold = 300;
+  static const double shelfThreshold = 150;
   static const double bookshelfThreshold = Constants.shelfCount * shelfThreshold;
 
   static const double minWidth = 10;
@@ -114,7 +110,7 @@ class Utils{
 
   static (double x, double y) getClosestPos(double x, double y, double width){
     double tmpX = Utils.clamp(x, Constants.initialXMargin, 
-        (Constants.width * (1 - Constants.marginXMultiplier))-width-Constants.initialXMargin);
+        (Constants.width * (1 - Constants.marginXMultiplier))-(width * locationToPixel)-Constants.initialXMargin*1.1);
     double tmpY = (((((y-Constants.initialYMargin).clamp(
       Constants.initialYMargin+Constants.shelfHeight, Constants.shelfCount * Constants.shelfHeight) 
                 + Constants.shelfHeight / 2) ~/ Constants.shelfHeight)) * Constants.shelfHeight) + Constants.initialYMargin;
