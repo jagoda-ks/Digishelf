@@ -60,26 +60,28 @@ class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMix
   _DragPhysics? _physics;
   late final Ticker _ticker;
 
-  // Whether the drag is currently hovering over the drop zone
   bool _isOverDropZone = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _ticker = createTicker((_elapsed) {
-      if (_physics != null) {
-        setState(() {
-          _physics!.tick(_elapsed);
-        });
-      }
-    });
-  }
+@override
+void initState() {
+  super.initState();
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    Constants.updateShelfHeight(MediaQuery.sizeOf(context).height);
+  });
+  _ticker = createTicker((_elapsed) {
+    if (_physics != null) {
+      setState(() {
+        _physics!.tick(_elapsed);
+      });
+    }
+  });
+}
 
-  @override
-  void dispose() {
-    _ticker.dispose();
-    super.dispose();
-  }
+@override
+void dispose() {
+  _ticker.dispose();
+  super.dispose();
+}
 
   static List<List<BookInfo>> _buildShelves() {
     final List<List<BookInfo>> result = [];
@@ -122,7 +124,6 @@ class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMix
     final Offset origin = Offset(_heldBook!.pos?.x ?? 0, _heldBook!.pos?.y ?? 0);
     final newPos = origin + details.offsetFromOrigin;
 
-    // Check drop zone using global position
     final bool overZone = _isInDropZone(details.globalPosition);
 
     setState(() {
@@ -136,7 +137,6 @@ class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMix
     _ticker.stop();
 
     if (_isOverDropZone) {
-      // Drop on desk zone — navigate to desk
       setState(() {
         _heldBook = null;
         _physics = null;
@@ -144,7 +144,6 @@ class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMix
       });
       _openDesk(book);
     } else {
-      // Normal drop — update position
       setState(() {
         _heldBook = null;
         _physics = null;
@@ -161,12 +160,10 @@ class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMix
         pageBuilder: (context, animation, secondaryAnimation) =>
             DeskPage(book: book),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          // Slide up from bottom
           const begin = Offset(0.0, 1.0);
           const end = Offset.zero;
           const curve = Curves.easeOutCubic;
-          final tween = Tween(begin: begin, end: end)
-              .chain(CurveTween(curve: curve));
+          final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
           return SlideTransition(
             position: animation.drive(tween),
             child: child,
@@ -235,14 +232,13 @@ class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMix
                           child: BookWidget(
                             title: book.title,
                             width: book.width,
-                            height: 200,
+                            height: 100,
                           ),
                         ),
                       ),
                     ),
                   );
                 }),
-
               ],
             ),
           ),
