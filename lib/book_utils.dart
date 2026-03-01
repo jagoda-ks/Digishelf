@@ -1,6 +1,7 @@
 // ignore_for_file: unnecessary_this
 
 import 'dart:typed_data';
+import 'package:digishelf/placement_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -22,9 +23,8 @@ void main() async{
 class BookInfo {
   double location = 0;
   double rot = 0;
-  double width = Utils.widthPerPage * Utils.defaultPageCount;
+  double width = Constants.widthPerPage * Constants.defaultPageCount;
   double height = 80;
-  double coveredWidth = 0;
   Vector2D? pos;
   int bookshelfNo = 0;
   Vector2D? boundaries;
@@ -38,9 +38,8 @@ class BookInfo {
   
 
   BookInfo(this.title, this.author, this.pageCount, this.pubDate, this.isbn, this.cover){
-    this.width = Utils.getWidth(pageCount);
-    this.coveredWidth = this.width;
-    this.location = Utils.getNextAvailablePos(this.width);
+    this.width = this.getWidth(pageCount);
+    this.location = PlacementManager.getNextAvailablePos(this.width);
     this.boundaries = Vector2D(location, this.location+width);
     var tmp = Utils.getPos(this.location);
     this.bookshelfNo = tmp.$3;
@@ -51,10 +50,12 @@ class BookInfo {
     Utils.books.sort((a, b) => a.location.compareTo(b.location));
     if(Utils.bookshelfCount < this.bookshelfNo){
       Utils.bookshelfCount = this.bookshelfNo;
-      Utils.addBoundaries(bookshelfNo);
+      PlacementManager.addBoundaries(bookshelfNo);
     }
-    this.width = Utils.clamp(this.width, 10, 40);
   }
+
+  double getWidth(int pages) => Utils.maxWidth *
+   (Utils.clamp(pages as double, 20, Constants.maxPages as double)/(Constants.maxPages));
 }
 
 class Constants{
@@ -66,6 +67,12 @@ class Constants{
 
   static double initialXMargin = 80;
   static double initialYMargin = 20;
+  static const double accuracyMeasure = 0.5;
+
+  //Page-related
+  static const double widthPerPage = 0.2;
+  static const int maxPages = 1000;
+  static const int defaultPageCount = 50; //If returns null
 
   static void updateShelfHeight(double screenHeight, double screenWidth){
     height = screenHeight;
@@ -82,97 +89,18 @@ class Utils{
   static const double bookshelfGap = 200;
   static const double shelfThreshold = 300;
   static const double bookshelfThreshold = Constants.shelfCount * shelfThreshold;
-  static const double accuracyMeasure = 3;
+
+  static const double minWidth = 10;
+  static const double maxWidth = 40;
 
   static int bookshelfCount = 0;
-
-  static const double widthPerPage = 2; //Temp value
-  static const int defaultPageCount = 50; //If returns null
   static List<BookInfo> books = List.empty(growable: true);
-  static List<double> regionAvailability = List.empty(growable: true);
-
-  static double getWidth(int pages) => widthPerPage * pages;
 
   static double adjustYWithRot() => Constants.shelfHeight;
 
-  static double getNextAvailablePos(double width){
-    print(regionAvailability.toString());
-    if (regionAvailability.isEmpty){
-      regionAvailability.add(0);
-      regionAvailability.add(width);
-      return 0;
-    }
-
-    bool isAvailable = (regionAvailability.length % 2 == 0);
-
-    for (int i = 0; i < regionAvailability.length-1; i++){
-      print(isAvailable);
-      isAvailable = !isAvailable;
-      if (isAvailable && regionAvailability[i+1] - regionAvailability[i] > width){
-        _updateBoundary(Vector2D(regionAvailability[i], regionAvailability[i] + width));
-        return regionAvailability[i];
-      }
-    }
-
-    _updateBoundary(Vector2D(regionAvailability[regionAvailability.length-1], 
-                      regionAvailability[regionAvailability.length-1] + width));
-    return regionAvailability[regionAvailability.length-1];
-  }
-
-  static bool spaceAvailable(double location, double width){
-    if (regionAvailability.isEmpty){
-      return true;
-    }
-
-    bool isAvailable = true;
-
-    for (int i = 0; i < regionAvailability.length-1; i++){
-      isAvailable = !isAvailable;
-      if (regionAvailability[i] > location){
-        if (isAvailable && regionAvailability[i] - regionAvailability[i-1] > width){
-          return true;
-        }
-      }
-    }
-
-    return (isAvailable) ? true : false;
-  }
 
   static double get locationToPixel => 
     (Constants.width * 0.85) / Utils.shelfThreshold;
-
-  static void _updateBoundary(Vector2D boundaryVec){
-    int toRemoveX = -1;
-    int toRemoveY = -1;
-    for(int i = 0; i<regionAvailability.length; i++){
-      if((regionAvailability[i] - boundaryVec.x).abs() < accuracyMeasure){
-        toRemoveX = i;
-      }
-      else if ((regionAvailability[i] - boundaryVec.y).abs() < accuracyMeasure){
-        toRemoveY = i;
-      }
-    }
-
-    print(toRemoveX);
-
-    if(toRemoveX != 0){
-      if (toRemoveX == -1) { regionAvailability.add(boundaryVec.x); }
-      else { regionAvailability.removeAt(toRemoveX); }
-    }
-
-    if(toRemoveY != 0){
-      if (toRemoveY == -1) { regionAvailability.add(boundaryVec.y); }
-      else { regionAvailability.removeAt(toRemoveY); }
-    }
-  }
-
-  static void addBoundaries(int bookshelfNo){
-    double edge = shelfThreshold + (bookshelfThreshold * (bookshelfNo-1));
-    for (int i = 0; i < Constants.shelfCount; i++){
-      _updateBoundary(Vector2D(edge, edge + 1));
-      edge += shelfThreshold;
-    }
-  }
 
   static (double x, double y, int bookshelfNo) getPos(double location){
     int tempNo = location ~/ bookshelfThreshold;
@@ -228,7 +156,7 @@ class Utils{
     final Uint8List coverBytes = coverResponse.bodyBytes;
     BookInfo temp = BookInfo(infoUnwrapped["title"], 
                              infoUnwrapped["authors"][0]["name"], 
-                             infoUnwrapped["number_of_pages"]??defaultPageCount, 
+                             infoUnwrapped["number_of_pages"]??Constants.defaultPageCount, 
                              infoUnwrapped["publish_date"]??"Unknown", 
                              isbn, coverBytes);
     return temp;

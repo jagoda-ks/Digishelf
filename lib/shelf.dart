@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:digishelf/placement_manager.dart';
 import 'package:flutter/material.dart';
 import 'book_utils.dart';
 import 'book_widget.dart';
@@ -61,7 +62,7 @@ List<(String asset, double top)> _shelfPlanks = [
 ];
 
 class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMixin {
-  final List<List<BookInfo>> shelves = _buildShelves();
+  List<List<BookInfo>> shelves = [];
 
   BookInfo? _heldBook;
   Offset _dragPosition = Offset.zero;
@@ -82,6 +83,14 @@ void initState() {
       });
     }
   });
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+      final size = MediaQuery.sizeOf(context);
+      Constants.updateShelfHeight(size.height, size.width);
+      setState(() {
+        shelves = _buildShelves();
+      });
+    });
 }
 
   @override
@@ -94,7 +103,7 @@ void initState() {
     final List<List<BookInfo>> result = [];
 
     Utils.books.clear();
-    Utils.regionAvailability.clear();
+    PlacementManager.regionAvailability.clear();
     result.add([
       BookInfo("The Hobbit",              "J.R.R. Tolkien",   310, "1937", "9780261102217", null),
       BookInfo("1984",                    "George Orwell",    328, "1949", "9780451524935", null),
@@ -106,16 +115,6 @@ void initState() {
       BookInfo("Crime and Punishment",    "Fyodor Dostoevsky",551, "1866", "9780679720201", null),
       BookInfo("The Odyssey",             "Homer",            374, "800BC","9780140449136", null),
       BookInfo("Pride and Prejudice",     "Jane Austen",      432, "1813", "9780141439518", null),
-    ]);
-
-    Utils.books.clear();
-    Utils.regionAvailability.clear();
-    result.add([
-      BookInfo("Harry Potter 1",          "J.K. Rowling",     309, "1997", "9780439708180", null),
-      BookInfo("The Hunger Games",        "Suzanne Collins",  374, "2008", "9780439023481", null),
-      BookInfo("The Road",                "Cormac McCarthy",  287, "2006", "9780307277671", null),
-      BookInfo("Ender's Game",            "Orson Scott Card", 352, "1985", "9780812550702", null),
-      BookInfo("The Alchemist",           "Paulo Coelho",     208, "1988", "9780062315007", null),
     ]);
 
     return result;
