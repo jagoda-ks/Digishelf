@@ -56,7 +56,7 @@ class Constants{
   static double shelfHeight = 0;
   static const shelfCount = 4;
 
-  static const double initialXMargin = 20;
+  static const double initialXMargin = 80;
   static const double initialYMargin = 20;
 
   static void updateShelfHeight(double screenHeight){
@@ -150,7 +150,8 @@ class Utils{
 
   static (double x, double y) getClosestPos(double x, double y){
     double tmpX = Utils.clamp(x, 0, shelfThreshold);
-    double tmpY = (((((y-Constants.initialYMargin).clamp(0, Constants.shelfCount * Constants.shelfHeight) 
+    double tmpY = (((((y-Constants.initialYMargin).clamp(
+      Constants.initialYMargin+Constants.shelfHeight, Constants.shelfCount * Constants.shelfHeight) 
                 + Constants.shelfHeight / 2) ~/ Constants.shelfHeight)) * Constants.shelfHeight) + Constants.initialYMargin;
     return (tmpX, tmpY);
   }

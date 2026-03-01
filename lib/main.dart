@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'shelf.dart';
 import 'pixelate_filter.dart';
+import 'book_utils.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,6 +12,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Constants.updateShelfHeight(MediaQuery.sizeOf(context).height);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: PixelateFilter(
