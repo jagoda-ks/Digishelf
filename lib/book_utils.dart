@@ -55,7 +55,7 @@ class Constants{
   static const shelfCount = 4;
 
   static const double initialXMargin = 20;
-  static const double initialYMargin = 80;
+  static const double initialYMargin = 20;
 
   static void updateShelfHeight(double screenHeight){
     shelfHeight = (screenHeight - 2*initialYMargin)/shelfCount;
@@ -141,20 +141,20 @@ class Utils{
   static (double x, double y, int bookshelfNo) getPos(double location){
     int tempNo = location ~/ bookshelfThreshold;
     location = location % bookshelfThreshold;
-    double tempY = ((location ~/ shelfThreshold)+1) * Constants.shelfHeight;
+    double tempY = ((location ~/ shelfThreshold)) * Constants.shelfHeight;
     double tempX = location % shelfThreshold;
     return (Constants.initialXMargin + tempX, Constants.initialYMargin + tempY, tempNo);
   }
 
   static (double x, double y) getClosestPos(double x, double y){
     double tmpX = Utils.clamp(x, 0, shelfThreshold);
-    double tmpY = (((((y-Constants.initialYMargin < 0) ? y : y-Constants.initialYMargin) ~/ Constants.shelfHeight)+1) 
-                                                          * Constants.shelfHeight) + Constants.initialYMargin;
+    double tmpY = (((((y-Constants.initialYMargin).clamp(0, Constants.shelfCount * Constants.shelfHeight) 
+                + Constants.shelfHeight / 2) ~/ Constants.shelfHeight)) * Constants.shelfHeight) + Constants.initialYMargin;
     return (tmpX, tmpY);
   }
 
   static double toLocation(double x, double y, int bookshelfNo){
-    int shelf = ((y - Constants.initialYMargin) ~/ Constants.shelfHeight) - 1;
+    int shelf = ((y - Constants.initialYMargin) ~/ Constants.shelfHeight);
     return x + (shelf * shelfThreshold) + (bookshelfNo * bookshelfThreshold);
   }
 
