@@ -189,7 +189,7 @@ void dispose() {
 
                 Positioned.fill(
                   child: Image.asset(
-                    'assets/shelf.png',
+                    'assets/Bookshelf_Shell.png',
                     fit: BoxFit.fill,
                     filterQuality: FilterQuality.none,
                   ),
@@ -257,15 +257,11 @@ void dispose() {
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
-                  colors: _isOverDropZone
-                      ? [
-                          Colors.amber.withOpacity(0.5),
-                          Colors.amber.withOpacity(0.1),
+                  colors: 
+                       [
+                          const Color.fromARGB(255, 112, 64, 10).withOpacity(0.8),
+                          const Color.fromARGB(255, 107, 57, 1).withOpacity(0.9),
                         ]
-                      : [
-                          Colors.white.withOpacity(0.15),
-                          Colors.white.withOpacity(0.0),
-                        ],
                 ),
               ),
               child: Center(
