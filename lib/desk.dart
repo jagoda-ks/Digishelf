@@ -25,6 +25,7 @@ class DeskPage extends StatelessWidget {
               title: book.title,
               width: 120,
               height: 180,
+              isbn: book.isbn,
             ),
             const SizedBox(height: 32),
             Text(
@@ -33,7 +34,7 @@ class DeskPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'ISBN: \${book.isbn}',
+              'isbn: \${book.isbn}',
               style: const TextStyle(color: Colors.white38, fontSize: 12),
             ),
           ],

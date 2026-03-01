@@ -1,9 +1,12 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class BookWidget extends StatefulWidget {
   final String title;
   final double width;
   final double height;
+  final String isbn;
   final VoidCallback? onTap;
 
   const BookWidget({
@@ -11,6 +14,7 @@ class BookWidget extends StatefulWidget {
     required this.title,
     required this.width,
     required this.height,
+    required this.isbn,
     this.onTap,
   });
 
@@ -20,6 +24,44 @@ class BookWidget extends StatefulWidget {
 
 class _BookWidgetState extends State<BookWidget> {
   bool _isHovered = false;
+  Uint8List? _coverBytes;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCover();
+  }
+
+  @override
+  void didUpdateWidget(BookWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isbn != widget.isbn) {
+      setState(() {
+        _coverBytes = null;
+        _loading = true;
+      });
+      _fetchCover();
+    }
+  }
+
+  Future<void> _fetchCover() async {
+    try {
+      // Open Library cover API — same source used by Utils.fetchBook
+      final url = 'https://covers.openlibrary.org/b/isbn/${widget.isbn}-M.jpg?default=false';
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200 && mounted) {
+        setState(() {
+          _coverBytes = response.bodyBytes;
+          _loading = false;
+        });
+      } else {
+        if (mounted) setState(() => _loading = false);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,98 +80,89 @@ class _BookWidgetState extends State<BookWidget> {
           child: Stack(
             children: [
               Positioned(
-                left: 0,
-                top: 0,
-                bottom: 0,
-                child: Container(
-                  width: widget.width * 0.1,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        Colors.brown.shade800,
-                        Colors.brown.shade600,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
                 left: widget.width * 0.08,
                 top: 0,
                 bottom: 0,
                 right: 0,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.amber.shade700,
-                        Colors.amber.shade900,
-                      ],
-                    ),
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(4),
-                      bottomRight: Radius.circular(4),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(4, 4),
-                      ),
-                    ],
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topRight: Radius.circular(4),
+                    bottomRight: Radius.circular(4),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          widget.title,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: widget.width * 0.12,
-                            fontWeight: FontWeight.bold,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black.withOpacity(0.5),
-                                offset: const Offset(1, 1),
-                                blurRadius: 2,
-                              ),
-                            ],
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                right: 0,
-                top: 4,
-                bottom: 4,
-                child: Container(
-                  width: 3,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.grey.shade300,
-                        Colors.grey.shade100,
-                        Colors.grey.shade300,
-                      ],
-                    ),
-                  ),
+                  child: _loading
+                      ? _placeholder()
+                      : _coverBytes != null
+                          ? Image.memory(
+                              _coverBytes!,
+                              filterQuality: FilterQuality.medium,
+                            )
+                          : _fallback(),
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _placeholder() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.grey.shade700,
+            Colors.grey.shade500,
+          ],
+        ),
+      ),
+      child: Center(
+        child: SizedBox(
+          width: widget.width,
+          height: widget.width,
+          child: CircularProgressIndicator(
+            strokeWidth: 1.5,
+            color: Colors.grey.shade300,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _fallback() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.amber.shade700,
+            Colors.amber.shade900,
+          ],
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Center(
+          child: Text(
+            widget.title,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: (widget.width * 0.12).clamp(6.0, 13.0),
+              fontWeight: FontWeight.bold,
+              shadows: [
+                Shadow(
+                  color: Colors.black.withOpacity(0.5),
+                  offset: const Offset(1, 1),
+                  blurRadius: 2,
+                ),
+              ],
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ),
