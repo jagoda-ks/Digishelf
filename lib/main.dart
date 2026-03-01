@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Constants.updateShelfHeight(MediaQuery.sizeOf(context).height);
+    Constants.updateShelfHeight(MediaQuery.sizeOf(context).height, MediaQuery.sizeOf(context).width);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: PixelateFilter(

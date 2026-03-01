@@ -65,9 +65,6 @@ class _ShelfPageState extends State<ShelfPage> with SingleTickerProviderStateMix
 @override
 void initState() {
   super.initState();
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    Constants.updateShelfHeight(MediaQuery.sizeOf(context).height);
-  });
   _ticker = createTicker((_elapsed) {
     if (_physics != null) {
       setState(() {
