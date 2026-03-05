@@ -94,9 +94,10 @@ class Utils{
 
   static double adjustYWithRot() => Constants.shelfHeight;
 
+  static double get totalShelfPixelWidth => (Constants.width - (2*Constants.initialXMargin))/1.15;
 
   static double get locationToPixel => 
-    (Constants.width * 0.85) / Utils.shelfThreshold;
+    totalShelfPixelWidth / Utils.shelfThreshold;
 
   static (double x, double y, int bookshelfNo) getPos(double location){
     int tempNo = location ~/ bookshelfThreshold;
@@ -109,8 +110,10 @@ class Utils{
   }
 
   static (double x, double y) getClosestPos(double x, double y, double width){
-    double tmpX = Utils.clamp(x, Constants.initialXMargin, 
-        (Constants.width * (1 - Constants.marginXMultiplier))-(width * locationToPixel)-Constants.initialXMargin*1.1);
+    double bookWidthPx = width * locationToPixel;
+    double maxX = Constants.initialXMargin + totalShelfPixelWidth - bookWidthPx;
+
+    double tmpX = Utils.clamp(x, Constants.initialXMargin, maxX);
     double tmpY = (((((y-Constants.initialYMargin).clamp(
       Constants.initialYMargin+Constants.shelfHeight, Constants.shelfCount * Constants.shelfHeight) 
                 + Constants.shelfHeight / 2) ~/ Constants.shelfHeight)) * Constants.shelfHeight) + Constants.initialYMargin;
@@ -128,7 +131,8 @@ class Utils{
   }
 
   static double toLocation(double x, double y, int bookshelfNo){
-    int shelf = ((y - Constants.initialYMargin) ~/ Constants.shelfHeight);
+    int shelf = ((y - Constants.initialYMargin) ~/ Constants.shelfHeight) - 1;
+    if (shelf < 0) shelf = 0;
     return x + (shelf * shelfThreshold) + (bookshelfNo * bookshelfThreshold);
   }
 
@@ -136,9 +140,9 @@ class Utils{
     book.bookshelfNo = bookshelfNo;
     var tmp = getClosestPos(endPos.dx, endPos.dy, book.width);
     book.pos = Vector2D(tmp.$1, tmp.$2);
-    double numericX = ((book.pos!.x - Constants.initialXMargin) / Utils.locationToPixel 
-                  / (Constants.width * 2 * (1 - Constants.marginXMultiplier))) * shelfThreshold;
+    double numericX = (book.pos!.x - Constants.initialXMargin) / Utils.locationToPixel;
     book.location = toLocation(numericX, book.pos!.y, bookshelfNo);
+    print("Location: ${book.location}");
     return Vector2D(book.pos!.x, book.pos!.y);
   }
 

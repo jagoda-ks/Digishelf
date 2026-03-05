@@ -184,7 +184,11 @@ void initState() {
         _isOverDropZone = false;
       });
       if (_hasDragged) {
-        final tmp = Utils.updatePos(book, endPosition, shelfIndex);
+        final RenderBox box = context.findRenderObject() as RenderBox;
+      
+        final Offset localOffset = box.globalToLocal(endPosition);
+
+        final tmp = Utils.updatePos(book, localOffset, shelfIndex);
         book.pos = tmp;
       }
       _hasDragged = false;

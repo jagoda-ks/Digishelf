@@ -77,11 +77,10 @@ class PlacementManager {
   }
 
   static void addBoundaries(int bookshelfNo){
-    double composite = (Constants.width * (1 - Constants.marginXMultiplier))-Constants.initialXMargin*1.1;
-    double edge = composite + (Utils.bookshelfThreshold * (bookshelfNo));
+    double edge = Utils.bookshelfThreshold * bookshelfNo;
     for (int i = 0; i < Constants.shelfCount; i++){
-      _updateBoundary(Vector2D(edge, edge + 1));
-      edge +=  composite;
+      edge += Utils.shelfThreshold;
+      _updateBoundary(Vector2D(edge - 1, edge)); // wall boundary at end of each shelf
     }
   }
 }
