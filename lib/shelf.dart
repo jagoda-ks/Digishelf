@@ -103,7 +103,6 @@ void initState() {
     final List<List<BookInfo>> result = [];
 
     Utils.books.clear();
-    PlacementManager.regionAvailability.clear();
     result.add([
       BookInfo("The Hobbit",              "J.R.R. Tolkien",   310, "1937", "9780261102217", null),
       BookInfo("The Hobbit",              "J.R.R. Tolkien",   310, "1937", "9780261102217", null),
@@ -120,8 +119,8 @@ void initState() {
       BookInfo("The Hobbit",              "J.R.R. Tolkien",   310, "1937", "9780261102217", null),
       BookInfo("The Hobbit",              "J.R.R. Tolkien",   310, "1937", "9780261102217", null),
       BookInfo("The Hobbit",              "J.R.R. Tolkien",   310, "1937", "9780261102217", null),
-      // BookInfo("1984",                    "George Orwell",    328, "1949", "9780451524935", null),
-      // BookInfo("Dune",                    "Frank Herbert",    688, "1965", "9780441013593", null),
+      BookInfo("1984",                    "George Orwell",    328, "1949", "9780451524935", null),
+      BookInfo("Dune",                    "Frank Herbert",    688, "1965", "9780441013593", null),
       // BookInfo("Fahrenheit 451",          "Ray Bradbury",     158, "1953", "9781451673319", null),
       // BookInfo("Brave New World",         "Aldous Huxley",    311, "1932", "9780060850524", null),
       // BookInfo("The Great Gatsby",        "F. Scott Fitzgerald", 180, "1925", "9780743273565", null),

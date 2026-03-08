@@ -63,7 +63,7 @@ class Constants{
 
   static double initialXMargin = 80;
   static double initialYMargin = 20;
-  static const double accuracyMeasure = 0.5;
+  static const double accuracyMeasure = 0.05;
 
   //Page-related
   static const double widthPerPage = 0.2;
@@ -89,7 +89,7 @@ class Utils{
   static const double minWidth = 10;
   static const double maxWidth = 40;
 
-  static int bookshelfCount = 0;
+  static int bookshelfCount = -1;
   static List<BookInfo> books = List.empty(growable: true);
 
   static double adjustYWithRot() => Constants.shelfHeight;

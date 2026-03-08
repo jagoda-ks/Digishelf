@@ -4,22 +4,22 @@ class PlacementManager {
 
   PlacementManager._();
 
-  static List<double> regionAvailability = List.empty(growable: true);
+  static List<double> regionAvailability = List.filled(1, 0, growable: true);
 
   static bool spaceAvailable(double location, double width){
     if (regionAvailability.isEmpty){
       return true;
     }
 
-    bool isAvailable = true;
+    bool isAvailable = (regionAvailability.length % 2 != 0);
 
     for (int i = 0; i < regionAvailability.length-1; i++){
-      isAvailable = !isAvailable;
       if (regionAvailability[i] > location){
         if (isAvailable && regionAvailability[i] - regionAvailability[i-1] > width){
           return true;
         }
       }
+      isAvailable = !isAvailable;
     }
 
     return (isAvailable) ? true : false;
@@ -27,21 +27,18 @@ class PlacementManager {
 
   static double getNextAvailablePos(double width){
     if (regionAvailability.isEmpty){
-      PlacementManager.addBoundaries(0);
-      regionAvailability.add(0);
-      regionAvailability.add(width);
-      
       return 0;
     }
 
-    bool isAvailable = (regionAvailability.length % 2 == 0);
+    bool isAvailable = (regionAvailability.length % 2 != 0);
 
     for (int i = 0; i < regionAvailability.length-1; i++){
-      isAvailable = !isAvailable;
       if (isAvailable && regionAvailability[i+1] - regionAvailability[i] > width){
-        _updateBoundary(Vector2D(regionAvailability[i], regionAvailability[i] + width));
-        return regionAvailability[i];
+        double pos = regionAvailability[i];
+        _updateBoundary(Vector2D(pos, pos + width));
+        return pos;
       }
+      isAvailable = !isAvailable;
     }
 
     double temp = regionAvailability[regionAvailability.length-1];
@@ -72,8 +69,6 @@ class PlacementManager {
     }
 
     regionAvailability.sort();
-
-    print(regionAvailability.toString());
   }
 
   static void addBoundaries(int bookshelfNo){
