@@ -34,7 +34,7 @@ class BookInfo {
 
   BookInfo(this.title, this.author, this.pageCount, this.pubDate, this.isbn, this.cover){
     this.width = this.getWidth(pageCount);
-    this.location = PlacementManager.getNextAvailablePos(this.width);
+    this.location = PlacementManager.getInitialAvailablePos(this.width, 0);
     this.boundaries = Vector2D(location, this.location+width);
     var tmp = Utils.getPos(this.location);
     this.bookshelfNo = tmp.$3;
@@ -63,7 +63,7 @@ class Constants{
 
   static double initialXMargin = 80;
   static double initialYMargin = 20;
-  static const double accuracyMeasure = 0.05;
+  static const double accuracyMeasure = 0.005;
 
   //Page-related
   static const double widthPerPage = 0.2;
@@ -142,6 +142,17 @@ class Utils{
     book.pos = Vector2D(tmp.$1, tmp.$2);
     double numericX = (book.pos!.x - Constants.initialXMargin) / Utils.locationToPixel;
     book.location = toLocation(numericX, book.pos!.y, bookshelfNo);
+    Utils.books.sort((a, b) => a.location.compareTo(b.location));
+
+    //Code to handle the first element here
+
+    // for (int i = 1; i < books.length; i++){
+
+      
+      
+    // }
+
+
     print("Location: ${book.location}");
     return Vector2D(book.pos!.x, book.pos!.y);
   }
